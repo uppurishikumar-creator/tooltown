@@ -1,0 +1,48 @@
+TOOLTOWN - PRAVALIKA
+Part 5 - Twist rule (automatic codes)
+Card says: "Make the 3 tests pass"
+==============================================================
+
+YOUR FILES
+  - codes.js
+
+--------------------------------------------------------------
+STEP 1 - ONE-TIME SETUP
+--------------------------------------------------------------
+  1. Install Git if you don't have it: https://git-scm.com/download/win
+  2. Accept the GitHub invite from uppurishikumar-creator (check your email)
+  3. In PowerShell, use your name and the email on YOUR GitHub account:
+       git config --global user.name "Pravalika"
+       git config --global user.email "your-github-email@example.com"
+  4. Download the project:
+       cd ~\Documents
+       git clone https://github.com/uppurishikumar-creator/tooltown.git
+       cd tooltown
+
+--------------------------------------------------------------
+STEP 2 - PUSH YOUR PART
+--------------------------------------------------------------
+  1. Get everyone's latest work FIRST:
+       git pull
+  2. Copy everything inside this zip's 'files' folder into ~\Documents\tooltown
+     Keep the folders: routes\... goes into tooltown\routes, postman\... into tooltown\postman
+  3. Push:
+       git add codes.js
+       git commit -m "Add automatic TLS tool codes (twist rule)"
+       git push
+  4. Tell the group on WhatsApp that you pushed.
+
+--------------------------------------------------------------
+IF git push IS REJECTED
+--------------------------------------------------------------
+  Someone pushed just before you. Run  git pull  and then  git push  again.
+
+--------------------------------------------------------------
+BE READY TO EXPLAIN ON DEMO DAY (Mon 16 Nov)
+--------------------------------------------------------------
+  - makeCode(id): id 1 -> TLS-0001 using padStart(4, '0')
+  - createToolWithCode: insert + set code inside ONE transaction (BEGIN / COMMIT / ROLLBACK)
+  - editableToolFields: only name and kind are kept, so a 'code' sent by the client is ignored
+  - Update never changes the code: the UPDATE query only sets name and kind
+  - AUTOINCREMENT means ids are never reused, so deleting TLS-0003 never gives TLS-0003 again
+  - The 3 tests: first tool -> 201 TLS-0001, second -> TLS-0002, update with new code -> 200 unchanged
