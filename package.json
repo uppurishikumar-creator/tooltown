@@ -1,0 +1,22 @@
+{
+  "name": "tooltown",
+  "version": "1.0.0",
+  "description": "ToolTown Makerspace tool library API (Express + SQLite)",
+  "main": "server.js",
+  "engines": {
+    "node": ">=22.13.0"
+  },
+  "scripts": {
+    "start": "node --disable-warning=ExperimentalWarning server.js",
+    "dev": "nodemon --exec \"node --disable-warning=ExperimentalWarning\" server.js",
+    "reset": "node -e \"require('fs').rmSync('tooltown.db',{force:true});console.log('Database deleted')\""
+  },
+  "keywords": ["express", "sqlite", "rest-api"],
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.22.3"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.14"
+  }
+}
