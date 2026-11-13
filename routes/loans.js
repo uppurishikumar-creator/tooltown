@@ -1,3 +1,4 @@
+// Author: Abhiram (Part 3 - REST endpoints)
 // Part 3 - REST endpoints: loans, including the JOIN endpoint
 const express = require('express');
 const queries = require('../queries');
