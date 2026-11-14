@@ -1,0 +1,12 @@
+# Render.com blueprint: New -> Blueprint -> pick this repo
+services:
+  - type: web
+    name: tooltown
+    runtime: node
+    plan: free
+    buildCommand: npm install
+    # Loads the sample dataset, then starts the server
+    startCommand: npm run start:render
+    envVars:
+      - key: NODE_VERSION
+        value: "24"

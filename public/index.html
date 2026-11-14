@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ToolTown Makerspace</title>
+<style>
+  :root {
+    --bg: #f6f7f9; --card: #ffffff; --text: #1d2330; --muted: #667085; --line: #e4e7ec;
+    --accent: #c2410c; --accent-soft: #fff1e8; --ok: #067647; --ok-soft: #ecfdf3;
+    --warn: #b42318; --warn-soft: #fef3f2; --info: #175cd3; --info-soft: #eff8ff;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0f1218; --card: #171b23; --text: #e6e9ef; --muted: #98a2b3; --line: #2a303c;
+      --accent: #fb923c; --accent-soft: #2b1a10; --ok: #47cd89; --ok-soft: #0f2a1d;
+      --warn: #f97066; --warn-soft: #2d1414; --info: #84caff; --info-soft: #102a43;
+    }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; background: var(--bg); color: var(--text); }
+  header { background: var(--card); border-bottom: 1px solid var(--line); }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  header .wrap { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding-top: 16px; padding-bottom: 16px; flex-wrap: wrap; }
+  h1 { font-size: 20px; margin: 0; }
+  h1 span { color: var(--accent); }
+  .sub { color: var(--muted); font-size: 13px; }
+  .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 12px; margin: 20px 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; }
+  .stat b { display: block; font-size: 26px; line-height: 1.2; }
+  .stat small { color: var(--muted); }
+  .stat.warn b { color: var(--warn); }
+  nav.tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--line); margin-bottom: 16px; overflow-x: auto; }
+  nav.tabs button { background: none; border: 0; border-bottom: 2px solid transparent; padding: 10px 14px; font: inherit; color: var(--muted); cursor: pointer; white-space: nowrap; }
+  nav.tabs button.active { color: var(--text); border-bottom-color: var(--accent); font-weight: 600; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 16px; margin-bottom: 16px; }
+  .card h2 { font-size: 15px; margin: 0 0 12px; }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: end; }
+  label { display: flex; flex-direction: column; gap: 4px; font-size: 12px; color: var(--muted); }
+  input, select { font: inherit; padding: 8px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--text); min-width: 160px; }
+  button.btn { font: inherit; padding: 8px 14px; border-radius: 8px; border: 1px solid var(--accent); background: var(--accent); color: #fff; cursor: pointer; font-weight: 600; }
+  button.ghost { background: transparent; color: var(--accent); padding: 4px 10px; font-size: 13px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); font-weight: 600; }
+  tr:last-child td { border-bottom: 0; }
+  .code { font-family: ui-monospace, Consolas, monospace; font-weight: 600; color: var(--accent); }
+  .pill { display: inline-block; padding: 2px 10px; border-radius: 999px; font-size: 12px; font-weight: 600; }
+  .pill.ok { background: var(--ok-soft); color: var(--ok); }
+  .pill.out { background: var(--info-soft); color: var(--info); }
+  .pill.late { background: var(--warn-soft); color: var(--warn); }
+  .pill.kind { background: var(--accent-soft); color: var(--accent); }
+  .msg { margin-top: 10px; font-size: 14px; min-height: 1.5em; }
+  .msg.err { color: var(--warn); }
+  .msg.good { color: var(--ok); }
+  .empty { color: var(--muted); padding: 16px 12px; }
+  footer { color: var(--muted); font-size: 12px; text-align: center; padding: 24px 16px 32px; }
+  footer code { background: var(--card); border: 1px solid var(--line); border-radius: 4px; padding: 1px 6px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div>
+      <h1>Tool<span>Town</span> Makerspace</h1>
+      <div class="sub">Tool library: who has what, and every tool's TLS code</div>
+    </div>
+    <button class="btn ghost" id="refresh">↻ Refresh</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="stats">
+    <div class="stat"><b id="s-tools">–</b><small>Tools</small></div>
+    <div class="stat"><b id="s-makers">–</b><small>Makers</small></div>
+    <div class="stat"><b id="s-out">–</b><small>Out on loan</small></div>
+    <div class="stat warn"><b id="s-late">–</b><small>Overdue</small></div>
+  </section>
+
+  <nav class="tabs">
+    <button data-tab="who" class="active">Who has what</button>
+    <button data-tab="tools">Tools</button>
+    <button data-tab="loans">All loans</button>
+    <button data-tab="makers">Makers</button>
+  </nav>
+
+  <!-- Who has what -->
+  <section class="panel active" id="who">
+    <div class="card">
+      <h2>Lend a tool</h2>
+      <div class="row">
+        <label>Maker <select id="b-maker"></select></label>
+        <label>Tool <select id="b-tool"></select></label>
+        <label>Due date <input type="date" id="b-due"></label>
+        <button class="btn" id="b-go">Lend</button>
+      </div>
+      <div class="msg" id="b-msg"></div>
+    </div>
+    <div class="card">
+      <h2>Tools out right now</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Code</th><th>Tool</th><th>Maker</th><th>Borrowed</th><th>Due</th><th>Status</th><th></th></tr></thead>
+        <tbody id="who-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- Tools -->
+  <section class="panel" id="tools">
+    <div class="card">
+      <h2>Add a tool <span class="sub">(the server gives it the next TLS code)</span></h2>
+      <div class="row">
+        <label>Name <input id="t-name" placeholder="e.g. Angle Grinder"></label>
+        <label>Kind <select id="t-kind"></select></label>
+        <button class="btn" id="t-add">Add tool</button>
+      </div>
+      <div class="msg" id="t-msg"></div>
+    </div>
+    <div class="card">
+      <h2>All tools</h2>
+      <div class="row" style="margin-bottom:12px">
+        <label>Search by kind <select id="f-kind"><option value="">All kinds</option></select></label>
+        <label>Search by name <input id="f-name" placeholder="e.g. drill"></label>
+      </div>
+      <div class="table-wrap"><table>
+        <thead><tr><th>Code</th><th>Name</th><th>Kind</th><th>Status</th></tr></thead>
+        <tbody id="tools-body"></tbody>
+      </table></div>
+      <div class="sub" id="tools-url" style="margin-top:8px"></div>
+    </div>
+  </section>
+
+  <!-- All loans -->
+  <section class="panel" id="loans">
+    <div class="card">
+      <h2>Loan history <span class="sub">(GET /loans: the join of loans, makers and tools)</span></h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Code</th><th>Tool</th><th>Maker</th><th>Borrowed</th><th>Due</th><th>Returned</th><th>Status</th></tr></thead>
+        <tbody id="loans-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+
+  <!-- Makers -->
+  <section class="panel" id="makers">
+    <div class="card">
+      <h2>Makers</h2>
+      <div class="table-wrap"><table>
+        <thead><tr><th>#</th><th>Name</th><th>Email</th><th>Tools out now</th></tr></thead>
+        <tbody id="makers-body"></tbody>
+      </table></div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  This page reads the same REST API Postman tests:
+  <code>/tools</code> <code>/makers</code> <code>/loans</code>. Raw JSON: <a href="/tools">/tools</a> · <a href="/loans">/loans</a> · <a href="/makers">/makers</a>
+</footer>
+
+<script>
+const KINDS = ['drill', 'saw', 'sander', 'hammer', 'screwdriver', 'wrench', 'clamp', 'other'];
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const today = new Date().toISOString().slice(0, 10);
+const day = (s) => (s ? String(s).slice(0, 10) : '–');
+
+let state = { tools: [], makers: [], loans: [] };
+
+async function api(path, options = {}) {
+  const res = await fetch(path, { headers: { 'Content-Type': 'application/json' }, ...options });
+  const body = await res.json().catch(() => ({}));
+  if (!res.ok) throw new Error(body.error || `Request failed (${res.status})`);
+  return body;
+}
+
+function loanStatus(l) {
+  if (l.returned_at) return '<span class="pill ok">Returned</span>';
+  if (l.due_date && l.due_date < today) return '<span class="pill late">Overdue</span>';
+  return '<span class="pill out">Out</span>';
+}
+
+async function loadAll() {
+  const [tools, makers, loans] = await Promise.all([api('/tools'), api('/makers'), api('/loans')]);
+  state = { tools, makers, loans };
+  const active = loans.filter((l) => !l.returned_at);
+  $('s-tools').textContent = tools.length;
+  $('s-makers').textContent = makers.length;
+  $('s-out').textContent = active.length;
+  $('s-late').textContent = active.filter((l) => l.due_date && l.due_date < today).length;
+  renderWho(active);
+  renderLoans();
+  renderMakers(active);
+  renderLendForm(active);
+  await renderTools();
+}
+
+function renderWho(active) {
+  $('who-body').innerHTML = active.length ? active.map((l) => `
+    <tr><td class="code">${esc(l.tool_code)}</td><td>${esc(l.tool_name)}</td><td>${esc(l.maker_name)}</td>
+    <td>${day(l.borrowed_at)}</td><td>${day(l.due_date)}</td><td>${loanStatus(l)}</td>
+    <td><button class="btn ghost" data-return="${l.id}">Mark returned</button></td></tr>`).join('')
+    : '<tr><td colspan="7" class="empty">Every tool is on the shelf.</td></tr>';
+}
+
+function renderLoans() {
+  const rows = [...state.loans].reverse();
+  $('loans-body').innerHTML = rows.length ? rows.map((l) => `
+    <tr><td>${l.id}</td><td class="code">${esc(l.tool_code)}</td><td>${esc(l.tool_name)}</td><td>${esc(l.maker_name)}</td>
+    <td>${day(l.borrowed_at)}</td><td>${day(l.due_date)}</td><td>${day(l.returned_at)}</td><td>${loanStatus(l)}</td></tr>`).join('')
+    : '<tr><td colspan="8" class="empty">No loans yet. Run <code>npm run seed</code> for sample data.</td></tr>';
+}
+
+function renderMakers(active) {
+  $('makers-body').innerHTML = state.makers.length ? state.makers.map((m) => {
+    const out = active.filter((l) => l.maker_name === m.name).map((l) => `<span class="code">${esc(l.tool_code)}</span>`).join(' ');
+    return `<tr><td>${m.id}</td><td>${esc(m.name)}</td><td>${esc(m.email)}</td><td>${out || '<span class="sub">none</span>'}</td></tr>`;
+  }).join('') : '<tr><td colspan="4" class="empty">No makers yet. Run <code>npm run seed</code> for sample data.</td></tr>';
+}
+
+function renderLendForm(active) {
+  const outIds = new Set(active.map((l) => l.tool_code));
+  $('b-maker').innerHTML = state.makers.map((m) => `<option value="${m.id}">${esc(m.name)}</option>`).join('');
+  $('b-tool').innerHTML = state.tools.filter((t) => !outIds.has(t.code))
+    .map((t) => `<option value="${t.id}">${esc(t.code)} · ${esc(t.name)}</option>`).join('');
+}
+
+async function renderTools() {
+  const params = new URLSearchParams();
+  if ($('f-kind').value) params.set('kind', $('f-kind').value);
+  if ($('f-name').value.trim()) params.set('name', $('f-name').value.trim());
+  const url = '/tools' + (params.toString() ? '?' + params : '');
+  const tools = await api(url);
+  const out = new Set(state.loans.filter((l) => !l.returned_at).map((l) => l.tool_code));
+  $('tools-url').innerHTML = `Request: <code>GET ${esc(url)}</code> → ${tools.length} result(s)`;
+  $('tools-body').innerHTML = tools.length ? tools.map((t) => `
+    <tr><td class="code">${esc(t.code)}</td><td>${esc(t.name)}</td><td><span class="pill kind">${esc(t.kind)}</span></td>
+    <td>${out.has(t.code) ? '<span class="pill out">On loan</span>' : '<span class="pill ok">Available</span>'}</td></tr>`).join('')
+    : '<tr><td colspan="4" class="empty">No tools match.</td></tr>';
+}
+
+function show(el, text, good) { el.textContent = text; el.className = 'msg ' + (good ? 'good' : 'err'); }
+
+// ----- events -----
+document.querySelectorAll('nav.tabs button').forEach((b) => b.addEventListener('click', () => {
+  document.querySelectorAll('nav.tabs button').forEach((x) => x.classList.toggle('active', x === b));
+  document.querySelectorAll('.panel').forEach((p) => p.classList.toggle('active', p.id === b.dataset.tab));
+}));
+
+$('refresh').addEventListener('click', loadAll);
+$('f-kind').addEventListener('change', renderTools);
+$('f-name').addEventListener('input', renderTools);
+
+$('t-add').addEventListener('click', async () => {
+  try {
+    const tool = await api('/tools', { method: 'POST', body: JSON.stringify({ name: $('t-name').value, kind: $('t-kind').value }) });
+    show($('t-msg'), `201 Created: "${tool.name}" got code ${tool.code}`, true);
+    $('t-name').value = '';
+    await loadAll();
+  } catch (e) { show($('t-msg'), '400: ' + e.message, false); }
+});
+
+$('b-go').addEventListener('click', async () => {
+  try {
+    const body = { maker_id: Number($('b-maker').value), tool_id: Number($('b-tool').value) };
+    if ($('b-due').value) body.due_date = $('b-due').value;
+    const loan = await api('/loans', { method: 'POST', body: JSON.stringify(body) });
+    show($('b-msg'), `201 Created: ${loan.tool_code} lent to ${loan.maker_name}`, true);
+    await loadAll();
+  } catch (e) { show($('b-msg'), e.message, false); }
+});
+
+$('who-body').addEventListener('click', async (e) => {
+  const id = e.target.dataset.return;
+  if (!id) return;
+  try { await api(`/loans/${id}/return`, { method: 'PATCH' }); await loadAll(); }
+  catch (err) { show($('b-msg'), err.message, false); }
+});
+
+// ----- start -----
+KINDS.forEach((k) => {
+  $('t-kind').insertAdjacentHTML('beforeend', `<option>${k}</option>`);
+  $('f-kind').insertAdjacentHTML('beforeend', `<option>${k}</option>`);
+});
+$('b-due').value = new Date(Date.now() + 7 * 864e5).toISOString().slice(0, 10);
+loadAll().catch((e) => { document.querySelector('main').insertAdjacentHTML('afterbegin', `<p class="msg err">Could not reach the API: ${esc(e.message)}</p>`); });
+</script>
+</body>
+</html>

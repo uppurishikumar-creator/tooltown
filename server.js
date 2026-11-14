@@ -1,5 +1,6 @@
 // Part 1 - Server and routes
 const express = require('express');
+const path = require('path');
 
 const makersRouter = require('./routes/makers');
 const toolsRouter = require('./routes/tools');
@@ -11,8 +12,11 @@ const PORT = process.env.PORT || 3000;
 // Read JSON request bodies into req.body
 app.use(express.json());
 
-// Home route: quick check that the server is up
-app.get('/', (req, res) => {
+// Web page: http://localhost:3000 shows the data in tables (public/index.html)
+app.use(express.static(path.join(__dirname, 'public')));
+
+// API info route: quick check that the server is up
+app.get('/api', (req, res) => {
   res.status(200).json({
     name: 'ToolTown Makerspace API',
     endpoints: ['/makers', '/tools', '/loans'],

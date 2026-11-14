@@ -15,19 +15,56 @@ Built with **Node.js**, **Express** and **SQLite** (Node's built-in `node:sqlite
 You need [Node.js](https://nodejs.org) **22.13 or newer** (check with `node -v`).
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/uppurishikumar-creator/tooltown.git
 cd tooltown
 npm install
+npm run seed
 npm start
 ```
 
-The server starts at **http://localhost:3000**. The database file `tooltown.db` is created automatically on first start.
+Open **http://localhost:3000** in a browser to see the data. The database file `tooltown.db` is created automatically on first start.
 
 | Command | What it does |
 |---|---|
 | `npm start` | Start the server |
 | `npm run dev` | Start with auto-restart on file changes (nodemon) |
-| `npm run reset` | Delete the database to start fresh (stop the server first) |
+| `npm run seed` | Fill the database with the sample dataset (8 makers, 15 tools, 10 loans) |
+| `npm run reset` | Delete the database to start fresh (stop the server first). Use this before the Postman tests |
+
+## Sample dataset
+
+`npm run seed` (in `seed.js`) clears the database and loads:
+
+- **8 makers**, e.g. Ravi Kumar, Ananya Reddy, Kiran Rao
+- **15 tools** across all 8 kinds. Each one is created through `codes.js`, so they get real codes **TLS-0001 to TLS-0015**
+- **10 loans**: 4 returned, 4 still out, and 2 **overdue**. Dates are relative to today, so the data always looks current
+
+The Postman tests need an **empty** database (the first tool must be TLS-0001), so run `npm run reset` before testing and `npm run seed` before a demo.
+
+## Web page
+
+Open **http://localhost:3000** while the server is running. The page (`public/index.html`) uses the same REST API that Postman tests:
+
+| Tab | What it shows | API it calls |
+|---|---|---|
+| Who has what | Tools out right now, overdue ones in red; lend a tool or mark it returned | `GET /loans`, `POST /loans`, `PATCH /loans/:id/return` |
+| Tools | Every tool with its TLS code; add a tool and see its new code; search by kind or name | `GET /tools?kind=`, `POST /tools` |
+| All loans | Full loan history (the join) | `GET /loans` |
+| Makers | Every maker and the tools they have | `GET /makers` |
+
+The raw JSON is still at `/tools`, `/makers`, `/loans`, and `/api` shows the API info.
+
+## Live on Render
+
+The app is set up for [Render](https://render.com) with `render.yaml`. Each deploy loads the sample dataset, then starts the server.
+
+1. Sign in to Render with GitHub.
+2. **New → Blueprint**, pick the `tooltown` repo, click **Apply**.
+3. Open the `https://tooltown-xxxx.onrender.com` link Render gives you.
+
+Live link: _add it here after deploying_
+
+On Render's free plan the app sleeps after 15 minutes without visits (the first visit then takes about a minute), and the sample data reloads on every restart.
 
 ## Running the Postman tests
 
@@ -171,6 +208,10 @@ tooltown/
 ├── validation.js      Part 4  Input checks and error messages
 ├── search.js          Part 4  Search by query parameter (?kind=, ?name=)
 ├── codes.js           Part 5  Automatic TLS codes (the twist)
+├── seed.js                    Sample dataset (npm run seed)
+├── public/
+│   └── index.html             Web page to view the data
+├── render.yaml                Render.com deploy settings
 ├── postman/
 │   └── ToolTown.postman_collection.json   Part 6
 └── README.md                              Part 6
@@ -190,5 +231,5 @@ All 32 requests and 56 tests pass in the Postman Collection Runner.
 | 2. Database | Arjun | `db.js`, `queries.js` |
 | 3. REST endpoints | Abhiram | `routes/tools.js`, `routes/makers.js`, `routes/loans.js` |
 | 4. Validation and search | Shashank | `validation.js`, `search.js` |
-| 5. Twist rule | Pravalika | `codes.js` |
+| 5. Twist rule | Pravallika | `codes.js` |
 | 6. Postman and README | Manivardhan | `postman/ToolTown.postman_collection.json`, `README.md` |

@@ -9,9 +9,15 @@
   "scripts": {
     "start": "node --disable-warning=ExperimentalWarning server.js",
     "dev": "nodemon --exec \"node --disable-warning=ExperimentalWarning\" server.js",
-    "reset": "node -e \"require('fs').rmSync('tooltown.db',{force:true});console.log('Database deleted')\""
+    "reset": "node -e \"require('fs').rmSync('tooltown.db',{force:true});console.log('Database deleted')\"",
+    "seed": "node --disable-warning=ExperimentalWarning seed.js",
+    "start:render": "node --disable-warning=ExperimentalWarning seed.js && node --disable-warning=ExperimentalWarning server.js"
   },
-  "keywords": ["express", "sqlite", "rest-api"],
+  "keywords": [
+    "express",
+    "sqlite",
+    "rest-api"
+  ],
   "license": "ISC",
   "dependencies": {
     "express": "^4.22.3"
