@@ -8,6 +8,8 @@ Built with **Node.js**, **Express** and **SQLite** (Node's built-in `node:sqlite
 
 **Group 6 · Section CSE2E · Theme 6: Tool library · Twist: Automatic codes**
 
+🌐 **Live demo: https://tooltown-1.onrender.com**
+
 ---
 
 ## How to run
@@ -59,10 +61,12 @@ The raw JSON is still at `/tools`, `/makers`, `/loans`, and `/api` shows the API
 The app is set up for [Render](https://render.com) with `render.yaml`. Each deploy loads the sample dataset, then starts the server.
 
 1. Sign in to Render with GitHub.
-2. **New → Blueprint**, pick the `tooltown` repo, click **Apply**.
-3. Open the `https://tooltown-xxxx.onrender.com` link Render gives you.
+2. **New → Web Service**, pick the `tooltown` repo, plan **Free**.
+3. Build command `npm install`, start command `npm run start:render`, environment variable `NODE_VERSION` = `24`.
 
-Live link: _add it here after deploying_
+(Or **New → Blueprint**, which reads these settings from `render.yaml`.)
+
+**Live link: https://tooltown-1.onrender.com**
 
 On Render's free plan the app sleeps after 15 minutes without visits (the first visit then takes about a minute), and the sample data reloads on every restart.
 
